@@ -22,12 +22,12 @@ jobs:
   # This also ensures version sync before any publishing
   build-and-test-nodejs:
     name: Build & Test Node.js
-    uses: ./.github/workflows/nodejs-build-test.yml
+    uses: ./.github/workflows/nodejs-build-call.yml
 
   # Publish Node.js packages to npm
   publish-nodejs-bindings:
     name: Publish to npm
     needs: build-and-test-nodejs
-    uses: ./.github/workflows/nodejs-publish.yml
+    uses: ./.github/workflows/nodejs-publish-call.yml
     secrets:
       NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
