@@ -1,4 +1,9 @@
 [advisories]
+# Ignore unmaintained rustls-pemfile - it's a transitive dev dependency via testcontainers.
+# Tracking: https://github.com/testcontainers/testcontainers-rs/issues (check for bollard update)
+ignore = [
+    "RUSTSEC-2025-0134",  # rustls-pemfile unmaintained, used by bollard → testcontainers (dev only)
+]
 
 [licenses]
 version = 2
