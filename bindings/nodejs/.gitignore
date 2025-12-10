@@ -1,7 +1,5 @@
 # Generated NAPI bindings
 *.node
-index.js
-index.d.ts
 
 # Rust build artifacts
 target/
