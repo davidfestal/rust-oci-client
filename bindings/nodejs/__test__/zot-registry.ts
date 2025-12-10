@@ -9,12 +9,22 @@ import { execSync } from 'child_process'
 import * as net from 'net'
 import { OciClient, ClientProtocol } from '../index.js'
 
-export const DEFAULT_PORT = 5001
 export const CONTAINER_NAME_PREFIX = 'oci-client-test-registry'
 export const ZOT_IMAGE = 'ghcr.io/project-zot/zot-minimal:latest'
 
+// Port range for registry instances (use high ports to avoid conflicts)
+const PORT_RANGE_START = 15000
+const PORT_RANGE_SIZE = 10000
+
 // Counter to ensure unique container names within the same process
 let instanceCounter = 0
+
+/**
+ * Get a random starting port to avoid race conditions when multiple test files start at once
+ */
+function getRandomStartPort(): number {
+  return PORT_RANGE_START + Math.floor(Math.random() * PORT_RANGE_SIZE)
+}
 
 export type ContainerRuntime = 'podman' | 'docker'
 
@@ -36,7 +46,7 @@ export async function isPortAvailable(port: number): Promise<boolean> {
 /**
  * Find an available port starting from a given port
  */
-export async function findAvailablePort(startPort: number = DEFAULT_PORT): Promise<number> {
+export async function findAvailablePort(startPort: number): Promise<number> {
   for (let port = startPort; port < startPort + 100; port++) {
     if (await isPortAvailable(port)) {
       return port
@@ -160,10 +170,9 @@ export class ZotRegistry {
 
     console.log(`🚀 Starting Zot registry using ${this._runtime}...`)
 
-    this._port = await findAvailablePort(DEFAULT_PORT)
-    if (this._port !== DEFAULT_PORT) {
-      console.log(`⚠️  Port ${DEFAULT_PORT} is in use, using port ${this._port} instead`)
-    }
+    // Use random starting port to avoid race conditions when parallel test files start
+    const startPort = getRandomStartPort()
+    this._port = await findAvailablePort(startPort)
 
     // Clean up any existing stopped container with same name
     try {
