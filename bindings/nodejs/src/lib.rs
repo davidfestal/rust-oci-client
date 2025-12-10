@@ -13,7 +13,7 @@ use oci_client::client::{
     PushResponse as NativePushResponse,
 };
 use oci_client::manifest::{
-    OciDescriptor, OciImageIndex, OciImageManifest, OciManifest, ImageIndexEntry, Platform,
+    ImageIndexEntry, OciDescriptor, OciImageIndex, OciImageManifest, OciManifest, Platform,
 };
 use oci_client::secrets::RegistryAuth as NativeRegistryAuth;
 use oci_client::{Client, Reference};
@@ -167,10 +167,7 @@ impl ClientConfig {
                 ClientProtocol::Http => NativeClientProtocol::Http,
                 ClientProtocol::Https => NativeClientProtocol::Https,
                 ClientProtocol::HttpsExcept => {
-                    let registries = self
-                        .https_except_registries
-                        .clone()
-                        .unwrap_or_default();
+                    let registries = self.https_except_registries.clone().unwrap_or_default();
                     NativeClientProtocol::HttpsExcept(registries)
                 }
             };
@@ -305,7 +302,11 @@ pub struct ImageData {
 impl ImageData {
     fn from_native(data: NativeImageData) -> Self {
         ImageData {
-            layers: data.layers.into_iter().map(ImageLayer::from_native).collect(),
+            layers: data
+                .layers
+                .into_iter()
+                .map(ImageLayer::from_native)
+                .collect(),
             digest: data.digest,
             config: Config::from_native(data.config),
             manifest: data.manifest.map(|m| m.into()),
@@ -591,11 +592,15 @@ impl TryFrom<Manifest> for OciManifest {
     fn try_from(m: Manifest) -> std::result::Result<Self, Self::Error> {
         match m.manifest_type {
             ManifestType::Image => {
-                let img = m.image.ok_or("image field required for Image manifest type")?;
+                let img = m
+                    .image
+                    .ok_or("image field required for Image manifest type")?;
                 Ok(OciManifest::Image(img.into()))
             }
             ManifestType::ImageIndex => {
-                let idx = m.image_index.ok_or("image_index field required for ImageIndex manifest type")?;
+                let idx = m
+                    .image_index
+                    .ok_or("image_index field required for ImageIndex manifest type")?;
                 Ok(OciManifest::ImageIndex(idx.into()))
             }
         }
@@ -696,8 +701,7 @@ impl OciClient {
         let reference = Reference::from_str(&image_ref)
             .map_err(|e| Error::from_reason(format!("Invalid image reference: {}", e)))?;
         let native_auth = auth.to_native()?;
-        let native_layers: Vec<NativeImageLayer> =
-            layers.iter().map(|l| l.to_native()).collect();
+        let native_layers: Vec<NativeImageLayer> = layers.iter().map(|l| l.to_native()).collect();
         let native_config = config.to_native();
         let native_manifest: Option<OciImageManifest> = manifest.map(|m| m.into());
 
@@ -801,14 +805,20 @@ impl OciClient {
     #[napi]
     pub async fn store_auth(&self, registry: String, auth: RegistryAuth) -> Result<()> {
         let native_auth = auth.to_native()?;
-        self.inner.store_auth_if_needed(&registry, &native_auth).await;
+        self.inner
+            .store_auth_if_needed(&registry, &native_auth)
+            .await;
         Ok(())
     }
 
     /// Pull a manifest (either image or index) from the registry.
     /// Returns the manifest and its digest.
     #[napi]
-    pub async fn pull_manifest(&self, image: String, auth: RegistryAuth) -> Result<PullManifestResult> {
+    pub async fn pull_manifest(
+        &self,
+        image: String,
+        auth: RegistryAuth,
+    ) -> Result<PullManifestResult> {
         let reference = Reference::from_str(&image)
             .map_err(|e| Error::from_reason(format!("Invalid image reference: {}", e)))?;
         let native_auth = auth.to_native()?;
@@ -907,12 +917,7 @@ impl OciClient {
 
     /// Mount a blob from another repository.
     #[napi]
-    pub async fn mount_blob(
-        &self,
-        target: String,
-        source: String,
-        digest: String,
-    ) -> Result<()> {
+    pub async fn mount_blob(&self, target: String, source: String, digest: String) -> Result<()> {
         let target_ref = Reference::from_str(&target)
             .map_err(|e| Error::from_reason(format!("Invalid target reference: {}", e)))?;
         let source_ref = Reference::from_str(&source)
@@ -939,7 +944,12 @@ impl OciClient {
 
         let tags = self
             .inner
-            .list_tags(&reference, &native_auth, n.map(|v| v as usize), last.as_deref())
+            .list_tags(
+                &reference,
+                &native_auth,
+                n.map(|v| v as usize),
+                last.as_deref(),
+            )
             .await
             .map_err(|e| Error::from_reason(format!("List tags failed: {}", e)))?;
 
@@ -1120,4 +1130,3 @@ pub fn bearer_auth(token: String) -> RegistryAuth {
         token: Some(token),
     }
 }
-
