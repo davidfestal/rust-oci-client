@@ -1,0 +1,24 @@
+name: Node.js Bindings CI
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - 'bindings/nodejs/**'
+      - 'src/**'
+      - 'Cargo.toml'
+      - '.github/workflows/nodejs-build-test.yml'
+      - '.github/workflows/nodejs-ci.yml'
+  pull_request:
+    paths:
+      - 'bindings/nodejs/**'
+      - 'src/**'
+      - 'Cargo.toml'
+      - '.github/workflows/nodejs-build-test.yml'
+      - '.github/workflows/nodejs-ci.yml'
+
+jobs:
+  build-and-test:
+    uses: ./.github/workflows/nodejs-build-test.yml
+

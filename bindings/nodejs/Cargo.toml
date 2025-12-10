@@ -1,0 +1,29 @@
+[package]
+name = "oci-client-nodejs-bindings"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+repository.workspace = true
+homepage.workspace = true
+description = "Node.js bindings for rust-oci-client"
+
+[lib]
+crate-type = ["cdylib"]
+
+[dependencies]
+# NAPI-RS for Node.js bindings
+napi = { version = "3", default-features = false, features = ["async", "napi4", "tokio_rt"] }
+napi-derive = "3"
+
+# Core OCI client - path dependency to parent crate
+oci-client = { path = "../..", default-features = false, features = ["rustls-tls"] }
+
+# Async runtime
+tokio = { version = "1", features = ["full"] }
+
+# Bytes for efficient buffer handling
+bytes = "1"
+
+[build-dependencies]
+napi-build = "2"
+

@@ -1,0 +1,82 @@
+{
+  "name": "@dfatwork-pkgs/oci-client",
+  "version": "0.15.0",
+  "description": "Node.js bindings for rust-oci-client - OCI Distribution client",
+  "main": "index.js",
+  "types": "index.d.ts",
+  "files": [
+    "index.d.ts",
+    "index.js"
+  ],
+  "napi": {
+    "binaryName": "oci-client",
+    "targets": [
+      "x86_64-pc-windows-msvc",
+      "x86_64-apple-darwin",
+      "x86_64-unknown-linux-gnu",
+      "x86_64-unknown-linux-musl",
+      "aarch64-unknown-linux-gnu",
+      "aarch64-apple-darwin",
+      "aarch64-unknown-linux-musl"
+    ]
+  },
+  "engines": {
+    "node": ">= 18"
+  },
+  "publishConfig": {
+    "registry": "https://registry.npmjs.org/",
+    "access": "public"
+  },
+  "scripts": {
+    "artifacts": "napi artifacts",
+    "build": "napi build --platform --release",
+    "build:debug": "napi build --platform",
+    "lint": "oxlint .",
+    "prepublishOnly": "napi prepublish -t npm",
+    "test": "ava",
+    "version": "napi version",
+    "check-version": "node -e \"const cargo = require('fs').readFileSync('../../Cargo.toml', 'utf8').match(/^version = \\\"(.+)\\\"/m)?.[1]; const npm = require('./package.json').version; if (cargo !== npm) { console.error('Version mismatch: Cargo.toml (' + cargo + ') != package.json (' + npm + ')'); process.exit(1); } console.log('✓ Versions in sync:', npm);\""
+  },
+  "devDependencies": {
+    "@napi-rs/cli": "^3.2.0",
+    "@oxc-node/core": "^0.0.35",
+    "@types/node": "^20.0.0",
+    "@types/tar": "^6.1.0",
+    "ava": "^6.4.1",
+    "oxlint": "^1.14.0",
+    "tar": "^7.0.0",
+    "typescript": "^5.9.2"
+  },
+  "ava": {
+    "extensions": {
+      "ts": "module"
+    },
+    "timeout": "2m",
+    "workerThreads": false,
+    "environmentVariables": {
+      "OXC_TSCONFIG_PATH": "./__test__/tsconfig.json"
+    },
+    "nodeArguments": [
+      "--import",
+      "@oxc-node/core/register"
+    ]
+  },
+  "keywords": [
+    "oci",
+    "registry",
+    "container",
+    "docker",
+    "distribution",
+    "napi",
+    "rust",
+    "bindings"
+  ],
+  "author": "",
+  "license": "Apache-2.0",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/oras-project/rust-oci-client",
+    "directory": "bindings/nodejs"
+  },
+  "packageManager": "yarn@4.12.0"
+}

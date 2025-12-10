@@ -1,3 +1,13 @@
+[workspace]
+members = [".", "bindings/nodejs"]
+
+[workspace.package]
+version = "0.15.0"
+edition = "2021"
+license = "Apache-2.0"
+repository = "https://github.com/oras-project/rust-oci-client"
+homepage = "https://github.com/oras-project/rust-oci-client"
+
 [package]
 authors = [
   "Matt Butcher <matt.butcher@microsoft.com>",
@@ -12,14 +22,14 @@ authors = [
 ]
 description = "An OCI implementation in Rust"
 documentation = "https://docs.rs/oci-client"
-edition = "2021"
-homepage = "https://github.com/oras-project/rust-oci-client"
+edition.workspace = true
+homepage.workspace = true
 keywords = ["oci", "containers"]
-license = "Apache-2.0"
+license.workspace = true
 name = "oci-client"
 readme = "README.md"
-repository = "https://github.com/oras-project/rust-oci-client"
-version = "0.15.0"
+repository.workspace = true
+version.workspace = true
 
 [badges]
 maintenance = { status = "actively-developed" }
@@ -72,3 +82,9 @@ tempfile = "3.21"
 testcontainers = "0.25"
 tokio = { version = "1", features = ["macros", "fs", "rt-multi-thread"] }
 tokio-util = { version = "0.7", features = ["compat"] }
+
+# Optimize release builds for smaller binary size
+# Note: lto is a workspace-wide setting, cannot be per-package
+[profile.release]
+lto = true
+strip = "symbols"
