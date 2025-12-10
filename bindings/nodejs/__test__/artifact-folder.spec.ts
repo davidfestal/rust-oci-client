@@ -149,32 +149,34 @@ let sourceFolder: string
 let imageRef: string
 const testFolderName = 'my-app-config'
 
-zotTest.before(() => {
-  sourceFolder = path.join(testDir, testFolderName)
-  fs.mkdirSync(sourceFolder, { recursive: true })
+if (!skipZot) {
+  test.serial.before(() => {
+    sourceFolder = path.join(testDir, testFolderName)
+    fs.mkdirSync(sourceFolder, { recursive: true })
 
-  fs.writeFileSync(
-    path.join(sourceFolder, 'config.json'),
-    JSON.stringify(
-      {
-        name: 'my-app',
-        version: '1.0.0',
-        settings: { debug: true },
-      },
-      null,
-      2
+    fs.writeFileSync(
+      path.join(sourceFolder, 'config.json'),
+      JSON.stringify(
+        {
+          name: 'my-app',
+          version: '1.0.0',
+          settings: { debug: true },
+        },
+        null,
+        2
+      )
     )
-  )
 
-  fs.writeFileSync(path.join(sourceFolder, 'README.md'), '# My App Config\n\nThis is a test.\n')
+    fs.writeFileSync(path.join(sourceFolder, 'README.md'), '# My App Config\n\nThis is a test.\n')
 
-  const subdir = path.join(sourceFolder, 'templates')
-  fs.mkdirSync(subdir)
-  fs.writeFileSync(path.join(subdir, 'main.tmpl'), 'Hello {{ .Name }}!')
-  fs.writeFileSync(path.join(subdir, 'error.tmpl'), 'Error: {{ .Message }}')
+    const subdir = path.join(sourceFolder, 'templates')
+    fs.mkdirSync(subdir)
+    fs.writeFileSync(path.join(subdir, 'main.tmpl'), 'Hello {{ .Name }}!')
+    fs.writeFileSync(path.join(subdir, 'error.tmpl'), 'Error: {{ .Message }}')
 
-  imageRef = zot.repo(`artifact-test:folder-${Date.now()}`)
-})
+    imageRef = zot.repo(`artifact-test:folder-${Date.now()}`)
+  })
+}
 
 zotTest('should push folder using push() method', async (t) => {
   const { configUrl, manifestUrl } = await pushFolderAsArtifact(client, sourceFolder, imageRef, 1)
