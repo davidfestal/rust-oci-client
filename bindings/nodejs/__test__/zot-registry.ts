@@ -10,8 +10,11 @@ import * as net from 'net'
 import { OciClient, ClientProtocol } from '../index.js'
 
 export const DEFAULT_PORT = 5001
-export const CONTAINER_NAME = 'oci-client-test-registry'
+export const CONTAINER_NAME_PREFIX = 'oci-client-test-registry'
 export const ZOT_IMAGE = 'ghcr.io/project-zot/zot-minimal:latest'
+
+// Counter to ensure unique container names within the same process
+let instanceCounter = 0
 
 export type ContainerRuntime = 'podman' | 'docker'
 
@@ -59,36 +62,6 @@ export async function waitForRegistry(port: number, maxAttempts = 30): Promise<v
     await new Promise((resolve) => setTimeout(resolve, 1000))
   }
   throw new Error(`Registry failed to start on port ${port}`)
-}
-
-/**
- * Check if the registry container is already running
- */
-function isContainerRunning(runtime: ContainerRuntime): boolean {
-  try {
-    const result = execSync(`${runtime} inspect -f '{{.State.Running}}' ${CONTAINER_NAME} 2>/dev/null`, {
-      encoding: 'utf-8',
-    }).trim()
-    return result === 'true'
-  } catch {
-    return false
-  }
-}
-
-/**
- * Get the port of a running container
- */
-function getContainerPort(runtime: ContainerRuntime): number | null {
-  try {
-    const result = execSync(`${runtime} port ${CONTAINER_NAME} 5000 2>/dev/null`, {
-      encoding: 'utf-8',
-    }).trim()
-    // Result format: "0.0.0.0:5001" or ":::5001"
-    const match = result.match(/:(\d+)$/)
-    return match ? parseInt(match[1], 10) : null
-  } catch {
-    return null
-  }
 }
 
 // Cache the runtime detection result
@@ -151,6 +124,12 @@ export class ZotRegistry {
   private _port: number = 0
   private _runtime: ContainerRuntime | null = null
   private _started: boolean = false
+  private _containerName: string
+
+  constructor() {
+    // Generate unique container name to avoid conflicts when test files run in parallel
+    this._containerName = `${CONTAINER_NAME_PREFIX}-${process.pid}-${++instanceCounter}`
+  }
 
   get port(): number {
     return this._port
@@ -164,27 +143,19 @@ export class ZotRegistry {
   get isStarted(): boolean {
     return this._started
   }
+  get containerName(): string {
+    return this._containerName
+  }
 
   /**
    * Start the Zot registry container.
-   * If already running (from a previous test run), reuses the existing container.
+   * Each instance starts its own container with a unique name.
    */
   async start(): Promise<void> {
     this._runtime = detectContainerRuntime()
 
     if (!this._runtime) {
       throw new Error('No container runtime (podman/docker) available')
-    }
-
-    // Check if container is already running (from a previous test run or another test file)
-    if (isContainerRunning(this._runtime)) {
-      const existingPort = getContainerPort(this._runtime)
-      if (existingPort) {
-        console.log(`♻️  Reusing existing Zot container on port ${existingPort}`)
-        this._port = existingPort
-        this._started = true
-        return
-      }
     }
 
     console.log(`🚀 Starting Zot registry using ${this._runtime}...`)
@@ -194,15 +165,15 @@ export class ZotRegistry {
       console.log(`⚠️  Port ${DEFAULT_PORT} is in use, using port ${this._port} instead`)
     }
 
-    // Clean up any existing stopped container
+    // Clean up any existing stopped container with same name
     try {
-      execSync(`${this._runtime} rm -f ${CONTAINER_NAME} 2>/dev/null`, { stdio: 'ignore' })
+      execSync(`${this._runtime} rm -f ${this._containerName} 2>/dev/null`, { stdio: 'ignore' })
     } catch {
       // Ignore errors
     }
 
     // Start Zot registry
-    execSync(`${this._runtime} run -d --name ${CONTAINER_NAME} -p ${this._port}:5000 ${ZOT_IMAGE}`, {
+    execSync(`${this._runtime} run -d --name ${this._containerName} -p ${this._port}:5000 ${ZOT_IMAGE}`, {
       stdio: 'inherit',
     })
 
@@ -229,7 +200,7 @@ export class ZotRegistry {
     if (this._runtime) {
       console.log('🧹 Stopping Zot registry container...')
       try {
-        execSync(`${this._runtime} rm -f ${CONTAINER_NAME}`, { stdio: 'ignore' })
+        execSync(`${this._runtime} rm -f ${this._containerName}`, { stdio: 'ignore' })
       } catch {
         // Ignore errors
       }
