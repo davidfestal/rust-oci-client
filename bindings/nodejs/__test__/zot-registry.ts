@@ -266,9 +266,16 @@ export function shouldSkipZotTests(): boolean {
     return cachedSkipResult
   }
 
+  // Check if tests are explicitly disabled (e.g., on Windows/macOS CI where Linux containers aren't available)
+  if (process.env.REQUIRE_PUSH_TESTS === 'false') {
+    console.log('⏭️  Skipping Zot tests: REQUIRE_PUSH_TESTS is false')
+    cachedSkipResult = true
+    return true
+  }
+
   const runtime = detectContainerRuntime()
   if (!runtime) {
-    const requireTests = process.env.REQUIRE_PUSH_TESTS === '1' || process.env.REQUIRE_PUSH_TESTS === 'true'
+    const requireTests = process.env.REQUIRE_PUSH_TESTS === 'true'
     if (requireTests) {
       throw new Error('REQUIRE_PUSH_TESTS is set but no container runtime (podman/docker) is available')
     }
