@@ -1,4 +1,4 @@
-name: Node.js Bindings Build and Test Called
+name: Node.js Bindings Build and Test Call
 
 on:
   workflow_call:
