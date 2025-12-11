@@ -32,7 +32,7 @@
     "build": "napi build --platform --release",
     "build:debug": "napi build --platform",
     "lint": "oxlint .",
-    "prepublishOnly": "napi prepublish -t npm",
+    "prepublishOnly": "napi prepublish -t npm --no-gh-release",
     "test": "ava",
     "version": "napi version",
     "check-version": "node -e \"const cargo = require('fs').readFileSync('../../Cargo.toml', 'utf8').match(/^version = \\\"(.+)\\\"/m)?.[1]; const npm = require('./package.json').version; if (cargo !== npm) { console.error('Version mismatch: Cargo.toml (' + cargo + ') != package.json (' + npm + ')'); process.exit(1); } console.log('✓ Versions in sync:', npm);\""
