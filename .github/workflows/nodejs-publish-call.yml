@@ -52,12 +52,15 @@ jobs:
         working-directory: bindings/nodejs
         run: |
           npm config set provenance true
-          if git log -1 --pretty=%B | grep "^v?[0-9]\+\.[0-9]\+\.[0-9]\+$";
+          # Use -E for extended regex, -q for quiet (just check exit code)
+          # Pattern: optional 'v', then semver (e.g., "0.15.0" or "v1.2.3")
+          if git log -1 --pretty=%B | grep -Eq "^v?[0-9]+\.[0-9]+\.[0-9]+$";
           then
             echo "//registry.npmjs.org/:_authToken=$NPM_TOKEN" >> ~/.npmrc
             npm publish --access public
-          elif git log -1 --pretty=%B | grep "^v?[0-9]\+\.[0-9]\+\.[0-9]\+";
+          elif git log -1 --pretty=%B | grep -Eq "^v?[0-9]+\.[0-9]+\.[0-9]+";
           then
+            # Matches semver with suffix (e.g., "0.15.0-next")
             echo "//registry.npmjs.org/:_authToken=$NPM_TOKEN" >> ~/.npmrc
             npm publish --tag next --access public
           else
