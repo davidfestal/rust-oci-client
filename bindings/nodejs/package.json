@@ -71,11 +71,11 @@
     "rust",
     "bindings"
   ],
-  "author": "",
+  "author": "dfestal@redhat.com",
   "license": "Apache-2.0",
   "repository": {
     "type": "git",
-    "url": "https://github.com/oras-project/rust-oci-client",
+    "url": "git+https://github.com/davidfestal/rust-oci-client",
     "directory": "bindings/nodejs"
   },
   "packageManager": "yarn@4.12.0"
