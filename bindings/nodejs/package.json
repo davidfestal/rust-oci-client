@@ -1,5 +1,5 @@
 {
-  "name": "@oras-project/oci-client",
+  "name": "@dfatwork-pkgs/oci-client",
   "version": "0.16.1",
   "description": "Node.js bindings for rust-oci-client - OCI Distribution client",
   "main": "index.js",
