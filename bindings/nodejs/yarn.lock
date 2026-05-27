@@ -5,6 +5,20 @@ __metadata:
   version: 8
   cacheKey: 10c0
 
+"@dfatwork/oci-client@workspace:.":
+  version: 0.0.0-use.local
+  resolution: "@dfatwork/oci-client@workspace:."
+  dependencies:
+    "@napi-rs/cli": "npm:^3.2.0"
+    "@oxc-node/core": "npm:^0.0.35"
+    "@types/node": "npm:^20.0.0"
+    ava: "npm:^6.4.1"
+    oxlint: "npm:^1.14.0"
+    selfsigned: "npm:^5.5.0"
+    typescript: "npm:^5.9.2"
+  languageName: unknown
+  linkType: soft
+
 "@emnapi/core@npm:^1.7.1":
   version: 1.7.1
   resolution: "@emnapi/core@npm:1.7.1"
@@ -1046,20 +1060,6 @@ __metadata:
   checksum: 10c0/b8d41098ba6fc194d13d641f9441347e3a3b96c0efabac0e14f57319340a2d4d1c8676e4cb37ab3062c5c323c617e790b0126916e9bf7b201b0cced0826f8ae2
   languageName: node
   linkType: hard
-
-"@oras-project/oci-client@workspace:.":
-  version: 0.0.0-use.local
-  resolution: "@oras-project/oci-client@workspace:."
-  dependencies:
-    "@napi-rs/cli": "npm:^3.2.0"
-    "@oxc-node/core": "npm:^0.0.35"
-    "@types/node": "npm:^20.0.0"
-    ava: "npm:^6.4.1"
-    oxlint: "npm:^1.14.0"
-    selfsigned: "npm:^5.5.0"
-    typescript: "npm:^5.9.2"
-  languageName: unknown
-  linkType: soft
 
 "@oxc-node/core-android-arm-eabi@npm:0.0.35":
   version: 0.0.35
@@ -2780,16 +2780,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"semver@npm:^7.3.2, semver@npm:^7.5.3":
-  version: 7.8.5
-  resolution: "semver@npm:7.8.5"
-  bin:
-    semver: bin/semver.js
-  checksum: 10c0/b1f3127a5be8125a94f37188b361c212466c292c6910adce3ec106cff5dc211ccaedc4739c11bb70fda59d6fc1f040a9bca289f4e093451521a2372e5231fe0c
-  languageName: node
-  linkType: hard
-
-"semver@npm:^7.7.3":
+"semver@npm:^7.3.2, semver@npm:^7.5.3, semver@npm:^7.7.3":
   version: 7.7.3
   resolution: "semver@npm:7.7.3"
   bin:

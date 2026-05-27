@@ -1,5 +1,5 @@
 {
-  "name": "@oras-project/oci-client",
+  "name": "@dfatwork/oci-client",
   "version": "0.17.0",
   "description": "Node.js bindings for rust-oci-client - OCI Distribution client",
   "main": "index.js",
@@ -77,7 +77,7 @@
   "license": "Apache-2.0",
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/oras-project/rust-oci-client.git",
+    "url": "git+https://github.com/davidfestal/rust-oci-client.git",
     "directory": "bindings/nodejs"
   },
   "packageManager": "yarn@4.12.0"
