@@ -5,16 +5,22 @@ on:
     branches:
       - main
     paths:
-      - 'bindings/nodejs/**'
       - 'src/**'
       - 'Cargo.toml'
+      - 'Cargo.lock'
+      - 'package.json'
+      - 'scripts/**'
+      - '__test__/**'
       - '.github/workflows/nodejs-build-call.yml'
       - '.github/workflows/nodejs-build.yml'
   pull_request:
     paths:
-      - 'bindings/nodejs/**'
       - 'src/**'
       - 'Cargo.toml'
+      - 'Cargo.lock'
+      - 'package.json'
+      - 'scripts/**'
+      - '__test__/**'
       - '.github/workflows/nodejs-build-call.yml'
       - '.github/workflows/nodejs-build.yml'
 
@@ -25,4 +31,3 @@ concurrency:
 jobs:
   build-and-test:
     uses: ./.github/workflows/nodejs-build-call.yml
-

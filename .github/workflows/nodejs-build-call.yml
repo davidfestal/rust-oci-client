@@ -27,11 +27,9 @@ jobs:
         run: corepack enable
 
       - name: Install dependencies
-        working-directory: bindings/nodejs
         run: yarn install
 
       - name: Oxlint
-        working-directory: bindings/nodejs
         run: yarn lint
 
   build:
@@ -41,9 +39,6 @@ jobs:
       fail-fast: false
       matrix:
         settings:
-          # All targets use native-tls (platform TLS: Security.framework on macOS,
-          # OpenSSL on Linux, Schannel on Windows). This avoids aws-lc-sys
-          # cross-compilation issues and ensures consistent TLS behavior.
           - host: macos-latest
             target: x86_64-apple-darwin
             build: yarn napi build --platform --release --target x86_64-apple-darwin --no-default-features --features native-tls && yarn fix-const-enums
@@ -59,7 +54,6 @@ jobs:
           - host: ubuntu-latest
             target: aarch64-unknown-linux-gnu
             build: yarn napi build --platform --release --target aarch64-unknown-linux-gnu --use-napi-cross --no-default-features --features native-tls-vendored && yarn fix-const-enums
-          # Cross-compiled Linux targets use vendored OpenSSL (compiled from source, since cross-toolchain sysroots don't ship it)
           - host: ubuntu-latest
             target: x86_64-unknown-linux-musl
             build: yarn napi build --platform --release --target x86_64-unknown-linux-musl -x --no-default-features --features native-tls-vendored && yarn fix-const-enums
@@ -100,7 +94,7 @@ jobs:
             ~/.napi-rs
             .cargo-cache
             target/
-          key: ${{ matrix.settings.target }}-cargo-${{ matrix.settings.host }}-${{ hashFiles('**/Cargo.lock', 'bindings/nodejs/yarn.lock') }}
+          key: ${{ matrix.settings.target }}-cargo-${{ matrix.settings.host }}-${{ hashFiles('**/Cargo.lock', 'yarn.lock') }}
           restore-keys: |
             ${{ matrix.settings.target }}-cargo-${{ matrix.settings.host }}-
 
@@ -118,11 +112,9 @@ jobs:
           tool: cargo-zigbuild
 
       - name: Install dependencies
-        working-directory: bindings/nodejs
         run: yarn install
 
       - name: Build
-        working-directory: bindings/nodejs
         run: ${{ matrix.settings.build }}
         shell: bash
 
@@ -130,7 +122,7 @@ jobs:
         uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # ratchet:actions/upload-artifact@v7
         with:
           name: bindings-${{ matrix.settings.target }}
-          path: bindings/nodejs/${{ env.APP_NAME }}.*.node
+          path: ${{ env.APP_NAME }}.*.node
           if-no-files-found: error
 
       - name: Upload generated JS/TS bindings
@@ -139,8 +131,8 @@ jobs:
         with:
           name: bindings-js
           path: |
-            bindings/nodejs/index.js
-            bindings/nodejs/index.d.ts
+            index.js
+            index.d.ts
           if-no-files-found: error
 
   test-macOS-windows-binding:
@@ -175,26 +167,21 @@ jobs:
         run: corepack enable
 
       - name: Install dependencies
-        working-directory: bindings/nodejs
         run: yarn install
 
       - name: Download native binary
         uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # ratchet:actions/download-artifact@v8
         with:
           name: bindings-${{ matrix.settings.target }}
-          path: bindings/nodejs
 
       - name: Download generated JS/TS bindings
         uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # ratchet:actions/download-artifact@v8
         with:
           name: bindings-js
-          path: bindings/nodejs
 
       - name: Test bindings
-        working-directory: bindings/nodejs
         run: yarn test
         env:
-          # Skip Zot registry tests - no container runtime available on macOS/Windows CI
           REQUIRE_PUSH_TESTS: 'false'
 
   test-linux-x64-binding:
@@ -218,23 +205,19 @@ jobs:
         run: corepack enable
 
       - name: Install dependencies
-        working-directory: bindings/nodejs
         run: yarn install
 
       - name: Download native binary
         uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # ratchet:actions/download-artifact@v8
         with:
           name: bindings-x86_64-unknown-linux-gnu
-          path: bindings/nodejs
 
       - name: Download generated JS/TS bindings
         uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # ratchet:actions/download-artifact@v8
         with:
           name: bindings-js
-          path: bindings/nodejs
 
       - name: Test bindings
-        working-directory: bindings/nodejs
         run: yarn test
         env:
           REQUIRE_PUSH_TESTS: 'false'
@@ -271,7 +254,6 @@ jobs:
           platforms: ${{ contains(matrix.target, 'aarch64') && 'arm64' || 'ppc64le' }}
 
       - name: Install dependencies
-        working-directory: bindings/nodejs
         run: |
           yarn config set --json supportedArchitectures.cpu '["current", "arm64", "x64", "ppc64"]'
           yarn config set --json supportedArchitectures.libc '["current", "musl", "gnu"]'
@@ -281,16 +263,13 @@ jobs:
         uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # ratchet:actions/download-artifact@v8
         with:
           name: bindings-${{ matrix.target }}
-          path: bindings/nodejs
 
       - name: Download generated JS/TS bindings
         uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # ratchet:actions/download-artifact@v8
         with:
           name: bindings-js
-          path: bindings/nodejs
 
       - name: Pre-compile TypeScript tests on host
-        working-directory: bindings/nodejs
         run: npx tsc -p __test__/tsconfig.json --outDir __test__
 
       - name: Test bindings in container
@@ -299,17 +278,10 @@ jobs:
           image: node:${{ matrix.node }}${{ contains(matrix.target, 'musl') && '-alpine' || '-slim' }}
           options: >-
             ${{ contains(matrix.target, 'aarch64') && '--platform linux/arm64' || contains(matrix.target, 'powerpc64le') && '--platform linux/ppc64le' || '' }}
-            -v ${{ github.workspace }}:/build -w /build/bindings/nodejs
+            -v ${{ github.workspace }}:/build -w /build
             -e REQUIRE_PUSH_TESTS=false
           run: corepack enable && yarn ava --config ava-precompiled.config.mjs
 
-  # This job tests the s390x native binding inside a QEMU system VM.
-  # Why full VM? Docker has no linux/s390x platform support on GitHub runners.
-  # Why pre-compiled tests? The TypeScript compiler (@oxc-node/core) is a native
-  #   x86_64 binary that cannot run on s390x.
-  # Why V8 interpreter-only flags? All JS JIT compilers (Sparkplug, Maglev,
-  #   TurboFan) generate code that crashes under QEMU TCG s390x emulation.
-  #   WebAssembly (Liftoff) is left enabled so Node's built-in fetch works.
   test-linux-system-emulation:
     name: Test - s390x-unknown-linux-gnu - node@22 (direct QEMU boot)
     needs: build
@@ -354,7 +326,6 @@ jobs:
         run: corepack enable
 
       - name: Install dependencies on host
-        working-directory: bindings/nodejs
         run: |
           yarn config set --json supportedArchitectures.cpu '["current", "s390x"]'
           yarn install
@@ -363,16 +334,13 @@ jobs:
         uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # ratchet:actions/download-artifact@v8
         with:
           name: bindings-s390x-unknown-linux-gnu
-          path: bindings/nodejs
 
       - name: Download generated JS/TS bindings
         uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # ratchet:actions/download-artifact@v8
         with:
           name: bindings-js
-          path: bindings/nodejs
 
       - name: Pre-compile TypeScript tests on host
-        working-directory: bindings/nodejs
         run: npx tsc -p __test__/tsconfig.json --outDir __test__
 
       - name: Build s390x rootfs image
@@ -381,9 +349,7 @@ jobs:
           sudo tar xf /tmp/ubuntu-s390x-assets/root.tar.xz -C /tmp/rootfs
           sudo tar -xJf /tmp/ubuntu-s390x-assets/node.tar.xz -C /tmp/rootfs/usr/local --strip-components=1
           sudo mkdir -p /tmp/rootfs/tmp/nodejs-test
-          sudo cp -a bindings/nodejs/. /tmp/rootfs/tmp/nodejs-test/
-          sudo mkdir -p /tmp/rootfs/tests/fixtures
-          sudo cp -a tests/fixtures/. /tmp/rootfs/tests/fixtures/
+          sudo cp -a . /tmp/rootfs/tmp/nodejs-test/
 
           # VM init script (PID 1): mounts, runs tests, signals result, powers off
           sudo tee /tmp/rootfs/run-test.sh > /dev/null << 'INITSCRIPT'
@@ -450,26 +416,20 @@ jobs:
         run: corepack enable
 
       - name: Install dependencies
-        working-directory: bindings/nodejs
         run: yarn install
 
       - name: Download native binary
         uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # ratchet:actions/download-artifact@v8
         with:
           name: bindings-x86_64-unknown-linux-gnu
-          path: bindings/nodejs
 
       - name: Download generated JS/TS bindings
         uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # ratchet:actions/download-artifact@v8
         with:
           name: bindings-js
-          path: bindings/nodejs
 
       - name: Run integration tests with Zot registry
-        working-directory: bindings/nodejs
         run: yarn test
         env:
-          # Require push tests - Docker is available on ubuntu-latest
           REQUIRE_PUSH_TESTS: 'true'
-          # Use Docker (pre-installed on GitHub Actions Ubuntu runners)
           CONTAINER_RUNTIME: docker

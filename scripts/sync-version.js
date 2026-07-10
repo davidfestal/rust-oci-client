@@ -5,7 +5,7 @@ const tagIdx = args.indexOf("--tag");
 const tag = tagIdx !== -1 ? args[tagIdx + 1]?.replace(/^v/, "") : null;
 
 const cargo = fs
-  .readFileSync("../../Cargo.toml", "utf8")
+  .readFileSync("Cargo.toml", "utf8")
   .match(/^version = "(.+)"/m)?.[1];
 
 if (!cargo) {

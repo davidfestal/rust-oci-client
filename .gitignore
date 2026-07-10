@@ -1,18 +1,29 @@
-# see rust-lang/cargo#315
-Cargo.lock
+# Generated NAPI bindings
+*.node
+index.js
+index.d.ts
 
+# Rust build artifacts
 target/
-**/*.rs.bk
-/config
-_dist/
+
+# Node.js dependencies
 node_modules/
+
+# npm package directories for distribution
+npm/
+
+# Build artifacts
+*.d.ts.map
+*.js.map
+
+# OS files
 .DS_Store
-.vscode/
+Thumbs.db
 
-# oneclick trace files
-krustlet-wasi-e2e.stdout.txt
-krustlet-wasi-e2e.stderr.txt
-oneclick-logs
-csi-test-binaries
-
-.idea/
+# Yarn
+.pnp.*
+.yarn/*
+!.yarn/patches
+!.yarn/plugins
+!.yarn/sdks
+!.yarn/versions

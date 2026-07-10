@@ -26,7 +26,7 @@ function sha256digest(buf: Buffer): string {
 // Single-platform fixtures (from native Rust tests)
 // ---------------------------------------------------------------------------
 
-const FIXTURES_DIR = path.join(__dirname, '..', '..', '..', 'tests', 'fixtures')
+const FIXTURES_DIR = path.join(__dirname, 'fixtures')
 const MANIFEST = fs.readFileSync(path.join(FIXTURES_DIR, 'manifest.json'))
 const CONFIG = fs.readFileSync(path.join(FIXTURES_DIR, 'config.json'))
 const BLOB = fs.readFileSync(path.join(FIXTURES_DIR, 'blob.tar.gz'))

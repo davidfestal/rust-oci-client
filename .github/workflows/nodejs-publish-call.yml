@@ -25,38 +25,32 @@ jobs:
           node-version: 22
 
       - name: Verify version consistency
-        working-directory: bindings/nodejs
         run: node scripts/sync-version.js --check
 
       - name: Enable Corepack
         run: corepack enable
 
       - name: Install dependencies
-        working-directory: bindings/nodejs
         run: yarn install
 
       - name: Create npm dirs
-        working-directory: bindings/nodejs
         run: yarn napi create-npm-dirs
 
       - name: Download all artifacts
         uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # ratchet:actions/download-artifact@v8
         with:
-          path: bindings/nodejs/artifacts
+          path: artifacts
 
       - name: Move artifacts
-        working-directory: bindings/nodejs
         run: |
           yarn artifacts
           cp artifacts/bindings-js/index.js artifacts/bindings-js/index.d.ts .
 
       - name: List packages
-        working-directory: bindings/nodejs
         run: ls -R ./npm
         shell: bash
 
       - name: Publish
-        working-directory: bindings/nodejs
         run: |
           npm config set provenance true
           npm config set access public
@@ -74,8 +68,6 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
 
-  # Build and test Node.js bindings FIRST
-  # This also ensures version sync before any publishing
   build-and-test-nodejs:
     name: Build & Test Node.js
     uses: ./.github/workflows/nodejs-build-call.yml

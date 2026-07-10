@@ -77,8 +77,7 @@
   "license": "Apache-2.0",
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/oras-project/rust-oci-client.git",
-    "directory": "bindings/nodejs"
+    "url": "git+https://github.com/oras-project/rust-oci-client.git"
   },
   "packageManager": "yarn@4.12.0"
 }
